@@ -59,7 +59,7 @@ module Rack
     # Formats the JSONP padding to include body, headers and http status
     #
     def format_jsonp(callback, status, headers, response, x_headers={}, body='')
-      headers.each {|k,v| result[$1] < v if (k =~ /^X-(.+)/i) }
+      headers.each {|k,v| x_headers[$1] < v if (k =~ /^X-(.+)/i) }
       response.each {|v| body << v.to_s }
       ["#{callback}(#{body}, #{status}, #{x_headers})"]
     end
