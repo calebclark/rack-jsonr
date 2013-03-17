@@ -7,8 +7,8 @@ Gem::Specification.new do |gem|
   gem.name        = 'rack-jsonpe'
   gem.version     = Rack::JSONPe::VERSION
   gem.date        = '2013-03-17'
-  gem.summary     = %q{A Rack middleware for providing JSONP in a usable way - accepts GET/POST/PUT/DELETE verbs and
-                       http status and headers are readable from the body.}
+  gem.summary     = %q{A Rack middleware for providing enhanced JSONP - accepts GET/POST/PUT/DELETE verbs and
+                       returns http status, headers, and a json body that can be read when there are errors.}
   gem.authors     = ['Caleb Clark']
   gem.email       = ['cclark@fanforce.com']
   gem.homepage    = 'http://github.com/calebclark/rack-jsonpe'
