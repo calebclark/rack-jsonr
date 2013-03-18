@@ -26,8 +26,11 @@ module Rack
       request = Rack::Request.new(env)
       params = request.params
 
-      if is_jsonp_request?(request) and params['request_method'].present?
-        env['REQUEST_METHOD'] = params['request_method'].upcase if ['POST','PUT','DELETE'].include?(params['request_method'].upcase)
+      if is_jsonp_request?(request)
+        env['IS_REQUESTING_JSONP'] = true
+        env['REQUEST_METHOD'] = params['request_method'].upcase if params['request_method'] and ['POST','PUT','DELETE'].include?(params['request_method'].upcase)
+      else
+        env['IS_REQUESTING_JSONP'] = false
       end
 
       if is_jsonp_request?(request) and is_json_response?(headers)
