@@ -64,7 +64,7 @@ module Rack
     def format_jsonp(callback, status, headers, response, x_headers={}, body='')
       headers.each {|k,v| x_headers[k] = v if (k =~ /^X-.+/i) }
       response.each {|v| body << v.to_s }
-      ["#{callback}(#{body}, #{status}, #{x_headers})"]
+      ["#{callback}(#{body}, #{status}, #{x_headers.to_json})"]
     end
 
   end
