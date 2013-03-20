@@ -27,13 +27,10 @@ module Rack
       params = request.params
 
       if is_jsonp_request?(request)
-        env['IS_REQUESTING_JSONP'] = true
         env['REQUEST_METHOD'] = params['request_method'].upcase if params['request_method'] and ['POST','PUT','DELETE'].include?(params['request_method'].upcase)
-      else
-        env['IS_REQUESTING_JSONP'] = false
       end
 
-      if is_jsonp_request?(request) and is_json_response?(headers)
+      if is_jsonp_request?(request) #and is_json_response?(headers)
         response = format_jsonp(request.params.delete('callback'), status, headers, response)
         status = 200
 
@@ -56,7 +53,11 @@ module Rack
     end
 
     def is_jsonp_request?(request)
-      @is_jsonp_request ||= (request.params.include?('callback') and request.get?)
+      @is_jsonp_request ||= self.class.is_jsonp_request?(request)
+    end
+
+    def self.is_jsonp_request?(request)
+      (request.params.include?('callback') and request.get?)
     end
 
     # Formats the JSONP padding to include body, headers and http status
