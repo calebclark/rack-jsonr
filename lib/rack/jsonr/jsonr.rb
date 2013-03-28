@@ -1,15 +1,16 @@
 require 'rack'
 
 module Rack
-  # A Rack middleware for providing JSONP in a usable way - accepts GET/POST/PUT/DELETE verbs and http status and
-  # headers are readable from the body.
-  #
-  # Based on Rack-JSONP by Flinn Mueller (http://actsasflinn.com/)
-  #
   class JSONR
+    # Based on Rack-JSONP by Flinn Mueller (http://actsasflinn.com/)
     include Rack::Utils
 
-    def initialize(app)
+    HTTP_METHODS = %w(GET HEAD PUT POST DELETE OPTIONS PATCH)
+    METHOD_OVERRIDE_PARAM_KEY = '_method'.freeze
+    HTTP_METHOD_OVERRIDE_HEADER = 'HTTP_X_HTTP_METHOD_OVERRIDE'.freeze
+
+    def initialize(app, options={})
+      @options = options
       @app = app
     end
 
@@ -26,11 +27,15 @@ module Rack
       request = Rack::Request.new(env)
       params = request.params
 
-      if is_jsonp_request?(request)
-        env['REQUEST_METHOD'] = params['request_method'].upcase if params['request_method'] and ['POST','PUT','DELETE'].include?(params['request_method'].upcase)
+      if is_jsonp_request?(request) or @options[:method_override] == :all
+        method_override = (params[METHOD_OVERRIDE_PARAM_KEY] || env[HTTP_METHOD_OVERRIDE_HEADER]).to_s.upcase
+        if HTTP_METHODS.include?(method_override)
+          env['rack.jsonr_method_override.original_method'] = env['REQUEST_METHOD']
+          env['REQUEST_METHOD'] = method_override
+        end
       end
 
-      if is_jsonp_request?(request) #and is_json_response?(headers)
+      if is_jsonp_request?(request)
         response = format_jsonp(request.params.delete('callback'), status, headers, response)
         status = 200
 
