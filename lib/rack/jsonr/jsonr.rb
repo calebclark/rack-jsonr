@@ -5,7 +5,7 @@ module Rack
     # Based on Rack-JSONP by Flinn Mueller (http://actsasflinn.com/)
     include Rack::Utils
 
-    HTTP_METHODS = %w(GET HEAD PUT POST DELETE OPTIONS PATCH)
+    HTTP_METHODS_TO_OVERRIDE = %w(HEAD PUT POST DELETE OPTIONS PATCH)
     METHOD_OVERRIDE_PARAM_KEY = '_method'.freeze
     HTTP_METHOD_OVERRIDE_HEADER = 'HTTP_X_HTTP_METHOD_OVERRIDE'.freeze
 
@@ -27,13 +27,7 @@ module Rack
       request = Rack::Request.new(env)
       params = request.params
 
-      if is_jsonp_request?(request) or @options[:method_override] == :all
-        method_override = (params[METHOD_OVERRIDE_PARAM_KEY] || env[HTTP_METHOD_OVERRIDE_HEADER]).to_s.upcase
-        if HTTP_METHODS.include?(method_override)
-          env['rack.jsonr_method_override.original_method'] = env['REQUEST_METHOD']
-          env['REQUEST_METHOD'] = method_override
-        end
-      end
+      self.class.intercept_method_override(env, request, params, @options[:method_override])
 
       if is_jsonp_request?(request)
         response = format_jsonp(request.params.delete('callback'), status, headers, response)
@@ -51,6 +45,20 @@ module Rack
       [status, headers, response]
     end
 
+    def self.intercept_method_override(env, request, params, override_scope)
+      if is_jsonp_request?(request) or override_scope == :all
+        method_override = (params[METHOD_OVERRIDE_PARAM_KEY] || env[HTTP_METHOD_OVERRIDE_HEADER]).to_s.upcase
+        if HTTP_METHODS_TO_OVERRIDE.include?(method_override)
+          env['rack.jsonr_method_override.original_method'] = env['REQUEST_METHOD']
+          env['REQUEST_METHOD'] = method_override
+        end
+      end
+    end
+
+    def self.is_jsonp_request?(request)
+      (request.params.include?('callback') and request.get?)
+    end
+
     private
 
     def is_json_response?(headers)
@@ -59,10 +67,6 @@ module Rack
 
     def is_jsonp_request?(request)
       @is_jsonp_request ||= self.class.is_jsonp_request?(request)
-    end
-
-    def self.is_jsonp_request?(request)
-      (request.params.include?('callback') and request.get?)
     end
 
     # Formats the JSONP padding to include body, headers and http status
