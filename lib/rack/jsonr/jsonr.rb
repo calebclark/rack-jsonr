@@ -48,7 +48,7 @@ module Rack
     def self.intercept_method_override(env, request, params, override_scope)
       if is_jsonp_request?(request) or override_scope == :all
         method_override = (params[METHOD_OVERRIDE_PARAM_KEY] || env[HTTP_METHOD_OVERRIDE_HEADER]).to_s.upcase
-        if HTTP_METHODS_TO_OVERRIDE.include?(method_override)
+        if HTTP_METHODS_TO_OVERRIDE.include?(method_override) and !env['rack.jsonr_method_override.original_method']
           env['rack.jsonr_method_override.original_method'] = env['REQUEST_METHOD']
           env['REQUEST_METHOD'] = method_override
         end
