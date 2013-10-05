@@ -56,7 +56,7 @@ module Rack
     end
 
     def self.is_jsonp_request?(request)
-      (request.params.include?('callback') and request.get?)
+      (request.params.include?('callback') and (request.get? or request.env['rack.jsonr_method_override.original_method'] == 'GET'))
     end
 
     private
