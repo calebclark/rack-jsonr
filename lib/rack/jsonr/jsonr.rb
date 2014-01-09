@@ -72,10 +72,15 @@ module Rack
     # Formats the JSONP padding to include body, headers and http status
     #
     def format_jsonp(callback, status, headers, response, x_headers={}, body='')
+      content_is_text = headers['Content-Type'].to_s.include?('text/html') ? true : false
       headers['Content-Type'] = 'application/javascript;charset=utf-8'
       headers.each {|k,v| x_headers[k] = v if (k =~ /^X-.+/i) }
       response.each {|v| body << v.to_s }
-      body = 'null' if body.nil? or body == ''
+      if body.nil? or body == ''
+        body = 'null'
+      elsif content_is_text
+        body = body.to_json
+      end
       ["#{callback}(#{body}, #{status}, #{x_headers.to_json})"]
     end
 
