@@ -94,4 +94,6 @@ function (xOptions, textStatus, json, httpStatus, httpHeaders) {
 
 We need to add tests.
 
+## License
 
+Please refer to [LICENSE.md](https://github.com/calebclark/rack-jsonr/blob/master/LICENSE.md).
