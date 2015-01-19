@@ -51,13 +51,6 @@ module Rack
         if HTTP_METHODS_TO_OVERRIDE.include?(method_override) and !env['rack.jsonr_method_override.original_method']
           env['rack.jsonr_method_override.original_method'] = env['REQUEST_METHOD']
           env['REQUEST_METHOD'] = method_override
-          if method_override == 'POST'
-            env['rack.request.query_hash'].each do |key,value|
-              next if !value.is_a?(Hash)
-              next if !value.all? {|k,v| k =~ /^[0-9]+$/ }
-              env['rack.request.query_hash'][key] = value.sort.inject([]) {|result, v| result << v[1] }
-            end
-          end
         end
       end
     end
